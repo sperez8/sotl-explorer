@@ -7,12 +7,15 @@ The visualizations were created using [D3.js](https://d3js.org/) and include a [
 ### Tool used
 The help page overlay was created using [Chardin.js](https://github.com/heelhook/chardin.js/tree/master).
 
-### People involved in the technical aspects of the project
-**Sarah Perez** - sarah.perez@ubc.ca ([https://spzfolio.com/](https://spzfolio.com/))
+### Contributors
+The following individuals were involved the design and technical development of the tool:
 
-**Rama Flarsheim**- ramaflarsheim@hotmail.com
+   **Sarah Perez** - sarah.perez@ubc.ca ([https://spzfolio.com/](https://spzfolio.com/))  
+   **Rama Flarsheim**- ramaflarsheim@hotmail.com  
+   **Kushal Goenka** - kushalgoenka@gmail.com  
 
-**Ido Roll** - ido.roll@ubc.ca ([http://idoroll.com/](http://idoroll.com/))
+The following individuals were involved with conceptual development and data collection aspects of the project:
 
-**Kushal Goenka** - kushalgoenka@gmail.com
-
+   **Ido Roll** - ido.roll@ubc.ca ([https://idoroll.com/](https://idoroll.com/))  
+   **Adriana Briseno-Garzon** - adriana.briseno@ubc.ca  
+   **Andrea Hahn** - andrea.han@ubc.ca  
