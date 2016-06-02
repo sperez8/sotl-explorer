@@ -1007,7 +1007,7 @@ var heatmapInnovationImpact = function(n) {
       .attr("x", setwidth)
       .attr("y", setheight-margin.heatmap.top)
       .attr("text-anchor", "middle");
-    return totalprojects
+    return 0
   } 
 
   dataRollUp = [];
@@ -1416,6 +1416,7 @@ var heatmapImpactApproach = function(n) {
   projectdata = projectdata.getUnique()
   totalnumberprojects = projectdata.length
 
+  console.log(totalnumberprojects)
   if (totalnumberprojects == 0) {
     setwidth = 990.0/2 - Math.max(margin.sankey.left + margin.sankey.right,margin.heatmap.left + margin.heatmap.right)*1.25
     setheight = 100 - margin.heatmap.top
@@ -1424,7 +1425,7 @@ var heatmapImpactApproach = function(n) {
       .attr("x", setwidth)
       .attr("y", setheight)
       .attr("text-anchor", "middle");
-    return totalprojects
+    return totalnumberprojects
   } 
 
   heatMapNest.forEach(function(d, v) {
@@ -2177,7 +2178,7 @@ var revealNumberOfProjects = function(total, numberselected, highlightTime) {
   removeReveal()
   d3.select("#NumberOfProjects").append("p")
     .html(function(){
-      if (total==0){return "Selected 0 out of 0 project"}
+      if (total==0 || typeof total == 'undefined'){return "Selected 0 out of 0 project"}
       else if (total==1){return "Selected " + numberselected + " out of " + total + " project"}
       else {return "Selected " + numberselected + " out of " + total + " projects"}
     })
