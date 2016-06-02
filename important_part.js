@@ -1,8 +1,4 @@
 // ****************************************************************** //
-//    WHAT TO DO TO PUT ON CMS:
-//    1. Uncomment window size using content div lin 6**
-//    2. Remove header and html tags
-//    
 // ****************************************************************** //
 // ****************************************************************** //
 // ****************************************************************** //
@@ -87,6 +83,7 @@ var category_tooltip = function(info) {
     .style("opacity", tooltipOpacity);
 }
 
+
 var highlightTime = 500 //milliseconds
 
 var reset_projects = function (){
@@ -127,7 +124,7 @@ var update_sankey_selection = function() {
   selected_projects = get_selected_projects()
   d3.selectAll(".link")
     .each(function(l) {
-      if ($.inArray(l.projectTitle, selected_projects) != -1) {
+      if ($.inArray(l["Project_title"], selected_projects) != -1) {
         no_project_selected = false
         d3.select(this).call(highlight_link, opacityHigh)
       } else {
@@ -167,7 +164,7 @@ var update_table_selection = function() {
   selected_projects = get_selected_projects()
   d3.selectAll(".rowShaded")
     .each(function(l) {
-      if ($.inArray(l.project_Title, selected_projects) != -1) {
+      if ($.inArray(l["Project_title"], selected_projects) != -1) {
         no_project_selected = false
         d3.select(this).call(highlight_row, darkbluetable)
       } else {
@@ -181,7 +178,7 @@ var update_table_selection = function() {
   }
   d3.selectAll(".rowNotShaded")
     .each(function(l) {
-      if ($.inArray(l.project_Title, selected_projects) != -1) {
+      if ($.inArray(l["Project_title"], selected_projects) != -1) {
         no_project_selected = false
         d3.select(this).call(highlight_row, darkbluetable)
       } else {
@@ -199,10 +196,10 @@ var highlight_project_sankey = function(link, title) {
   if (get_selected_projects()[0] != "getUnique" && get_selected_projects().length > 0) {return null} //not sure why this happens on first load but it works...
   d3.selectAll(".link")
     .each(function(l) {
-      if (l.projectTitle == title) {
+      if (l["Project_title"] == title) {
         d3.select(this).call(highlight_link, opacityHigh)
-        highlightProjectInList(l.projectTitle)
-      //} else if (projectSelectionTracker[l.projectTitle]!=true){
+        highlightProjectInList(l["Project_title"])
+      //} else if (projectSelectionTracker[l["Project_title"]]!=true){
       } else {
         d3.select(this).call(highlight_link, opacityLow)
       }
@@ -226,18 +223,18 @@ var highlight_project_table = function(row, title) {
   if (get_selected_projects()[0] != "getUnique" && get_selected_projects().length > 0) {return null} //not sure why this happens on first load but it works...
   d3.selectAll(".rowShaded")
     .each(function(l) {
-      if (l.project_Title == title) {
+      if (l["Project_title"] == title) {
         d3.select(this).call(highlight_row,darkbluetable)
-        highlightProjectInList(l.project_Title)
+        highlightProjectInList(l["Project_title"])
       } else {
         d3.select(this).call(highlight_row,null)
       }
     })
     d3.selectAll(".rowNotShaded")
     .each(function(l) {
-      if (l.project_Title == title) {
+      if (l["Project_title"] == title) {
         d3.select(this).call(highlight_row,darkbluetable)
-        highlightProjectInList(l.project_Title)
+        highlightProjectInList(l["Project_title"])
       } else {
         d3.select(this).call(highlight_row,null)
       }
@@ -444,9 +441,16 @@ d3.sankey = function() {
         d3.sum(node.sourceLinks, value),
         d3.sum(node.targetLinks, value)
       );
+    // source_projects = node.sourceLinks.map(function(d) {return d["Name of project"]}).getUnique()
+    // target_projects = node.targetLinks.map(function(d) {return d["Name of project"]}).getUnique()
+    // node.value = Math.max(source_projects.length, target_projects.length);
     });
   }
 
+  // Iteratively assign the breadth (x-position) for each node.
+  // Nodes are assigned the maximum breadth of incoming neighbors plus one;
+  // nodes with no incoming links are assigned breadth zero, while
+  // nodes with no outgoing links are assigned the maximum breadth.
   function computeNodeBreadths() {
     var remainingNodes = nodes,
       nextNodes,
@@ -689,9 +693,9 @@ var margin = {
 
 //width = 1200 - margin.sankey.left - margin.sankey.right,
 //height = 800 - margin.sankey.top - margin.sankey.bottom;
-//width = document.getElementById("allCharts").offsetWidth
+width = document.getElementById("allCharts").offsetWidth
+console.log(document.body.clientWidth,document.getElementById("sidebars").offsetWidth,document.getElementById("viz").offsetWidth)
 width = (document.body.clientWidth - document.getElementById("sidebars").offsetWidth)*0.8
-//width = (document.getElementById("content").offsetWidth - document.getElementById("sidebars").offsetWidth)*0.8
 height = window.innerHeight - 140
 
 var formatNumber = d3.format(",.0f"), // zero decimal places
@@ -738,10 +742,8 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
   d3.select("#innovationImpactChart").selectAll("svg").remove();
   d3.select("#impactApproachChart").selectAll("svg").remove();
   d3.select("#project-table").selectAll("tr").remove();
-  d3.select("#project-table").selectAll("table").remove();
   d3.select("#project-table").selectAll("svg").remove();
   d3.select("#project-table").selectAll("th").remove();
-  //d3.select("#help").selectAll("img").remove();
 
   //all the single option filters are of type ==
   if (faculty != "Faculty (all)") {
@@ -752,23 +754,22 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
       return d.Faculty_School == faculty;
     });
   }
-
   
   if (projectType != "Project type (all)") {
     heatMapdata = heatMapdata.filter(function(d) {
-      return d.project_Type == projectType; 
+      return d.project_type == projectType; 
     });
     data1 = data1.filter(function(d) {
-      return d["Type of Project"] == projectType;
+      return d["Type of project"] == projectType;
     }); //Sankey chart loads the data differently thank heat maps  :S
   }
 
   if (projectStage != "Project stage (all)") {
     heatMapdata = heatMapdata.filter(function(d) {
-      return d.project_Stage == projectStage;
+      return d.project_stage == projectStage;
     });
     data1 = data1.filter(function(d) {
-      return d["Project Stage"] == projectStage;
+      return d["Project stage"] == projectStage;
     });
   }
 
@@ -777,7 +778,7 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
       return d.year_awarded == yearAwarded;
     });
     data1 = data1.filter(function(d) {
-      return d["Year Awarded"] == yearAwarded;
+      return d["Year awarded"] == yearAwarded;
     });
   }
 
@@ -798,7 +799,7 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
 
     //find all projects with desired "innovation"
     relevant_projects = data1.map(function(d) {
-      if (d["source"] == innovation){return d["project_Title"]}
+      if (d["source"] == innovation){return d["Name of project"]}
     }).getUnique()
 
     //find all impacts that it links too
@@ -808,7 +809,7 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
 
     //filter if row matchs project and impact
     data1 = data1.filter(function(d) {
-      if ($.inArray(d["project_Title"], relevant_projects) != -1){
+      if ($.inArray(d["Name of project"], relevant_projects) != -1){
         if (d["source"] == innovation || ($.inArray(d["source"], relevant_impacts) != -1)){
           return true
         }
@@ -832,7 +833,7 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
     
     //find all projects with desired "evaluation"
     relevant_projects = data1.map(function(d) {
-      if (d["target"] == evaluation){return d["project_Title"]}
+      if (d["target"] == evaluation){return d["Name of project"]}
     }).getUnique()
 
     //find all impacts that it links too
@@ -842,7 +843,7 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
 
     //filter if row matchs project and impact
     data1 = data1.filter(function(d) {
-      if ($.inArray(d["project_Title"], relevant_projects) != -1){
+      if ($.inArray(d["Name of project"], relevant_projects) != -1){
         if (d["target"] == evaluation || ($.inArray(d["target"], relevant_impacts) != -1)){
           return true
         }
@@ -897,13 +898,15 @@ var heatmapInnovationImpact = function(n) {
       value: +d["value"],
       Course_Level: d["Course_Level"],
       Faculty_School: d["Faculty_School"],
-      project_Title: d["project_Title"],
+      Project_title: d["Name of project"],
       department: d["Department"],
-      enrolment_Cap: d["Enrolment Cap"],
-      course_Format: d["Course Format"],
-      project_Type: d["Type of Project"],
-      project_Stage: d["Project Stage"],
-      year_awarded: d["Year Awarded"]
+      enrolment_cap: d["Enrolment cap"],
+      course_format: d["Primary course format"],
+      Course_type: d["Course type"],
+      course_location: d["Course location"],
+      project_type: d["Type of project"],
+      project_stage: d["Project stage"],
+      year_awarded: d["Year awarded"]
     };
   });
 
@@ -912,6 +915,7 @@ var heatmapInnovationImpact = function(n) {
   //Great nest learning tool: http://bl.ocks.org/shancarter/raw/4748131/ 
   var heatMapNest = d3.nest()
     .key(function(d) {
+      console.log(d)
       return d.matrix;
     })
     .key(function(d) {
@@ -958,7 +962,7 @@ var heatmapInnovationImpact = function(n) {
     .attr("height", height + margin.heatmap.top + margin.heatmap.bottom)
     .append("g")
     .attr("transform",
-      "translate(" + Math.max(margin.sankey.left + margin.sankey.right,margin.heatmap.left + margin.heatmap.right)*1.25 + "," + margin.heatmap.top + ")")
+      "translate(" + Math.max(margin.sankey.left + margin.sankey.right,margin.heatmap.left + margin.heatmap.right)*1.25 + "," + margin.heatmap.top + ")");
 
   var svg = d3.select("#innovationImpactChart").selectAll("g")
     .append("g")
@@ -980,20 +984,21 @@ var heatmapInnovationImpact = function(n) {
       return d.innovation;
     })
     .key(function(d) {
+      console.log(d)
       return d.impact;
     })
     .rollup(function(projects) {
       // return d3.sum(projects, function(d) {
       //   return d.value;
       // })
-      return projects.map(function(d) {return d["project_Title"]}).getUnique()
+      return projects.map(function(d) {return d["Project_title"]}).getUnique()
     })
     .map(heatMapdata, d3.map).get("innovationXimpact");
 
 
   projectdata = []
   heatMapdata.forEach(function(d) {
-    projectdata.push(d.project_Title);
+    projectdata.push(d["Project_title"]);
   });
   // return only the distinct / unique nodes
   projectdata = projectdata.getUnique()
@@ -1099,11 +1104,7 @@ var heatmapInnovationImpact = function(n) {
     .style("text-anchor", "end")
     .style("vertical-align", "middle")
     .on("mouseover", function(d) {
-      if (d!="Total") {
-        category_tooltip(capitalizeFirstLetter(longnames[d].toLowerCase()))
-      } else {
-        category_tooltip("Total per area of impact")
-      }
+      category_tooltip(capitalizeFirstLetter(longnames[d].toLowerCase()))
     })
     .on("mouseout", function() {remove_tooltip()})
     .call(wrapx, margin.heatmap.left);
@@ -1121,7 +1122,7 @@ var heatmapInnovationImpact = function(n) {
     .attr("class", "heading")
     .attr("x", -10)
     .attr("y", -20)
-    .attr("text-anchor", "end")
+    .attr("text-anchor", "end");
   svg.append("text").text("Area of impact")
     .attr("class", "heading")
     .attr("x", 0)
@@ -1144,11 +1145,7 @@ var heatmapInnovationImpact = function(n) {
     .attr("class", "impactLabel")
     .style("text-anchor", "start")
     .on("mouseover", function(d) {
-      if (d!="Total") {
-        category_tooltip(capitalizeFirstLetter(longnames[d].toLowerCase()))
-      } else {
-        category_tooltip("Total per innovation")
-      }
+      category_tooltip(capitalizeFirstLetter(longnames[d].toLowerCase()))
     })
     .on("mouseout", function() {remove_tooltip()})
     .call(wrapy, gridSizeX);
@@ -1316,13 +1313,15 @@ var heatmapImpactApproach = function(n) {
       value: +d.value,
       Course_Level: d.Course_Level,
       Faculty_School: d.Faculty_School,
-      project_Title: d["project_Title"],
+      Project_title: d["Name of project"],
       department: d.Department,
-      enrolment_Cap: d["Enrolment Cap"],
-      course_Format: d["Course Format"],
-      project_Type: d["Type of Project"],
-      project_Stage: d["Project Stage"],
-      year_awarded: d["Year Awarded"]
+      enrolment_cap: d["Enrolment cap"],
+      course_format: d["Primary course format"],
+      Course_type: d["Course type"],
+      course_location: d["Course location"],
+      project_type: d["Type of project"],
+      project_stage: d["Project stage"],
+      year_awarded: d["Year awarded"]
     };
   });
 
@@ -1402,7 +1401,7 @@ var heatmapImpactApproach = function(n) {
       return d.impact;
     })
     .rollup(function(projects) {
-      return projects.map(function(d) {return d["project_Title"]}).getUnique()
+      return projects.map(function(d) {return d["Project_title"]}).getUnique()
     })
     .map(heatMapdata, d3.map).get("impactXapproach");
 
@@ -1410,7 +1409,7 @@ var heatmapImpactApproach = function(n) {
 
   projectdata = []
   heatMapdata.forEach(function(d) {
-    projectdata.push(d.project_Title);
+    projectdata.push(d["Project_title"]);
   });
   // return only the distinct / unique nodes
   projectdata = projectdata.getUnique()
@@ -1521,11 +1520,7 @@ var heatmapImpactApproach = function(n) {
     .style("text-anchor", "end")
     .style("vertical-align", "middle")
     .on("mouseover", function(d) {
-      if (d!="Total") {
-        category_tooltip(capitalizeFirstLetter(longnames[d].toLowerCase()))
-      } else {
-        category_tooltip("Total per evaluation approach")
-      }
+      category_tooltip(capitalizeFirstLetter(longnames[d].toLowerCase()))
     })
     .on("mouseout", function() {remove_tooltip()})
     .call(wrapx, margin.heatmap.left - 30);
@@ -1551,11 +1546,7 @@ var heatmapImpactApproach = function(n) {
     .attr("class", "approachLabel")
     .style("text-anchor", "start")
     .on("mouseover", function(d) {
-      if (d!="Total") {
-        category_tooltip(capitalizeFirstLetter(longnames[d].toLowerCase()))
-      } else {
-        category_tooltip("Total per area of impact")
-      }
+      category_tooltip(capitalizeFirstLetter(longnames[d].toLowerCase()))
     })
     .on("mouseout", function() {remove_tooltip()})
     .call(wrapy, gridSizeY);
@@ -1733,7 +1724,7 @@ var sankeyChart = function(n) { //this is used to hide the previous chart. Shoul
 
   filterData();
   oldwidth = width
-  wdith = oldwidth + Math.max(margin.sankey.left + margin.sankey.right,margin.heatmap.left + margin.heatmap.right)
+  wdith = width + Math.max(margin.sankey.left + margin.sankey.right,margin.heatmap.left + margin.heatmap.right)
   // append the svg canvas to the page
   var svg = d3.select("#sankeyChart").append("svg")
     .attr("width", width + Math.max(margin.sankey.left + margin.sankey.right,margin.heatmap.left + margin.heatmap.right))
@@ -1763,7 +1754,7 @@ var sankeyChart = function(n) { //this is used to hide the previous chart. Shoul
       "source": d.source,
       "target": d.target,
       "value": +d.value,
-      "projectTitle": d.project_Title
+      "Project_title": d["Name of project"]
     });
   });
 
@@ -1789,7 +1780,7 @@ var sankeyChart = function(n) { //this is used to hide the previous chart. Shoul
   });
 
   totalprojects = graph.links.map(function(d) {
-      return d["projectTitle"]
+    return d["Project_title"]
     }).getUnique()
   totalnumberprojects = totalprojects.length
 
@@ -1882,19 +1873,19 @@ var sankeyChart = function(n) { //this is used to hide the previous chart. Shoul
     })
     .style("fill","none")
     .on("click", function (l){
-      if (projectSelectionTracker[l.projectTitle]){
+      if (projectSelectionTracker[l["Project_title"]]){
         unselect_all_projects()
-        projectSelectionTracker[l.projectTitle] = false
+        projectSelectionTracker[l["Project_title"]] = false
       } else {
         unselect_all_projects()
-        projectSelectionTracker[l.projectTitle] = true
+        projectSelectionTracker[l["Project_title"]] = true
       }
       update_sankey_selection()
       revealNumberOfProjects(totalnumberprojects, get_number_of_selected_projects(), highlightTime)
     })
     .on("mouseover", function(l) {
       d3.select(this)
-        .call(highlight_project_sankey, l.projectTitle)
+        .call(highlight_project_sankey, l["Project_title"])
     })
     .on("mouseout", function() {
       remove_highlight_list_item()
@@ -2006,17 +1997,19 @@ var tabulate = function() {
           project_lead: d["Name of PI or project lead(s)"],
           Course_Level: d["Course_Level"],
           Faculty_School: d["Faculty_School"],
-          project_Title: d["project_Title"],
+          Project_title: d["Name of project"],
           department: d["Department"],
-          enrolment_Cap: d["Enrolment Cap"],
-          course_Format: d["Course Format"],
-          project_Type: d["Type of Project"],
-          project_Stage: d["Project Stage"],
-          year_awarded: d["Year Awarded"]
+          enrolment_cap: d["Enrolment cap"],
+          course_format: d["Primary course format"],
+          Course_type: d["Course type"],
+          course_location: d["Course location"],
+          project_type: d["Type of project"],
+          project_stage: d["Project stage"],
+          year_awarded: d["Year awarded"]
         };
       });
     //var tableData = d3.nest()   //this works to give a unique list of project titles. 
-    //.key(function(d) {return d.project_Title;})
+    //.key(function(d) {return d["Name of project"];})
     //.map(data,d3.map).keys().sort(d3.ascending);
 
     filterData()
@@ -2032,11 +2025,12 @@ var tabulate = function() {
 
     var x = "_XX_"; //nothing should match this ;)
     function unique(value) {
-      return_this = (x != value["project_Title"]);
-      x = value["project_Title"];
+      return_this = (x != value["Project_title"]);
+      x = value["Project_title"];
       return return_this;
     }
     tableData = tableData.filter(unique);
+    console.log(tableData)
     totalnumberprojects = tableData.length
 
     if (totalnumberprojects == 0) {
@@ -2074,18 +2068,18 @@ var tabulate = function() {
       })
       .on("mouseover", function(l) {
         d3.select(this)
-          .call(highlight_project_table, l.project_Title)
+          .call(highlight_project_table, l["Project_title"])
       })
       .on("mouseout", function() {
         remove_highlight_list_item()
         update_table_selection()
       })
       .on("click", function (l){
-      if (projectSelectionTracker[l.project_Title]) {
+      if (projectSelectionTracker[l["Project_title"]]) {
         unselect_all_projects()
       } else{
         unselect_all_projects()
-        projectSelectionTracker[l.project_Title] = true
+        projectSelectionTracker[l["Project_title"]] = true
       }
       update_table_selection()
       revealNumberOfProjects(totalnumberprojects, get_number_of_selected_projects(), highlightTime)
@@ -2112,7 +2106,7 @@ var tabulate = function() {
 
 
     projects = tableData.map(function(d) {
-      return d["project_Title"]
+      return d["Project_title"]
     })
     return projects;
   } //end tabulate
@@ -2167,13 +2161,12 @@ function get_number_of_selected_projects() {
   return numberselectedprojects
 }
 
-var removeReveal = function() {
-  d3.select("#NumberOfProjects").selectAll("p")
-    .remove();
-};
-
 //Show the number of projects displayed in Sankey and HeatMap
 var revealNumberOfProjects = function(total, numberselected, highlightTime) {
+  var removeReveal = function() {
+    d3.select("#NumberOfProjects").selectAll("p")
+      .remove();
+  };
   removeReveal()
   d3.select("#NumberOfProjects").append("p")
     .html(function(){
@@ -2186,11 +2179,11 @@ var revealNumberOfProjects = function(total, numberselected, highlightTime) {
 
 var updateprojectList = function(projectdata) {
   //total = projects.length
-  var removeprojectlist = function() {
+  var removeReveal = function() {
     d3.select("#projectList").selectAll("svg")
       .remove();
   };
-  removeprojectlist()
+  removeReveal()
 
   function wrap(text, width, listheight) {
     text.each(function() {
@@ -2288,14 +2281,10 @@ var updateprojectList = function(projectdata) {
 }
 
 function rerun(currentChartType) {
-  projects = ChartType[currentChartType]()
-  if (projects != "help") {
-    total = projects.length
-    revealNumberOfProjects(total, get_number_of_selected_projects(), highlightTime)
-    updateprojectList(projects)
-  } else {
-    removeReveal()
-  }
+  projects = ChartType[currentChartType](1)
+  total = projects.length
+  revealNumberOfProjects(total, get_number_of_selected_projects(), highlightTime)
+  updateprojectList(projects)
 }
 
 
@@ -2324,9 +2313,9 @@ function get_filterOptions(filterName) {
 //choice arrays for filters
 var courseLevelList = ["Course level (all)"].concat(get_filterOptions("Course_Level"))
 var facultyList = ["Faculty (all)"].concat(get_filterOptions("Faculty_School"))
-var projectTypeList = ["Project type (all)"].concat(get_filterOptions("Type of Project"))
-var projectStageList = ["Project stage (all)"].concat(get_filterOptions("Project Stage"))
-var yearAwardedList = ["Year awarded (all)"].concat(get_filterOptions("Year Awarded"))
+var projectTypeList = ["Project type (all)"].concat(get_filterOptions("Type of project"))
+var projectStageList = ["Project stage (all)"].concat(get_filterOptions("Project stage"))
+var yearAwardedList = ["Year awarded (all)"].concat(get_filterOptions("Year awarded"))
 
 
 function get_filterCategoryOptions(category) {
@@ -2340,6 +2329,7 @@ function get_filterCategoryOptions(category) {
         return d["target"]
       }
     }).getUnique()
+  options = options.filter(function(n){ return n != undefined }); 
   newoptions = []
   for (var i = options.length - 1; i >= 0; i--) {
     if (options[i] != " " && options[i] != "") {
@@ -2356,7 +2346,7 @@ var impactList = ["Impact (all)"].concat(get_filterCategoryOptions("Impact"))
 var evaluationList = ["Evaluation (all)"].concat(get_filterCategoryOptions("Evaluation"))
 
 //columns to display for table
-var tableColumns = ["project_Title", "project_lead","department","enrolment_Cap", "Course_Level", "course_Format", "project_Type", "year_awarded"];
+var tableColumns = ["Project_title", "project_lead","department","enrolment_cap", "Course_Level", "course_format", "project_type", "year_awarded"];
 
 //set default start values
 faculty = "Faculty (all)";
@@ -2373,16 +2363,15 @@ var ChartType = {
   "sankeyChart": sankeyChart,
   "innovationImpactChart": heatmapInnovationImpact,
   "impactApproachChart": heatmapImpactApproach,
-  "project-table": tabulate,
-  // "help": runhelp
+  "project-table": tabulate
 };
 
 
-var currentChartType = "innovationImpactChart" //set the default chart type to be sankey
+var currentChartType = "sankeyChart" //set the default chart type to be sankey
 
 function get_current_chart() {
   currentChart = ''
-  divs = ["sankeyChart","innovationImpactChart","impactApproachChart","project-table","help"]
+  divs = ["sankeyChart","innovationImpactChart","impactApproachChart","project-table"]
   for (var i = divs.length - 1; i >= 0; i--) {
     if ( $('#'+divs[i]).is(':empty') ) {
     } else { currentChart = divs[i]}
@@ -2442,7 +2431,6 @@ var evaluationPicker = d3.select("#context-filter-evaluation").append("select").
 });
 
 
-
 facultyPicker.selectAll("option").data(facultyList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 courseLevelPicker.selectAll("option").data(courseLevelList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 projectTypePicker.selectAll("option").data(projectTypeList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
@@ -2452,7 +2440,7 @@ innovationPicker.selectAll("option").data(innovationList).enter().append("option
 impactPicker.selectAll("option").data(impactList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 evaluationPicker.selectAll("option").data(evaluationList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 
-allprojects = get_filterOptions("project_Title")
+allprojects = get_filterOptions("Name of project")
 
 for (var i = allprojects.length - 1; i >= 0; i--) {
   projectSelectionTracker[allprojects[i]] = false
@@ -2478,12 +2466,29 @@ function click_button(button) {
 }
 
 //chartType buttons:
+d3.select("#chartTypeButtons") //Sankey
+  .append("input")
+  .attr("value", "Flow")
+  .attr("type", "button")
+  .attr("class", function (){
+  //.style("background",  function() {
+      if (currentChartType == "sankeyChart"){
+        return "big_button clicked"
+      } else {return "big_button unclicked"}
+  })
+  .on("click", function() {
+    unclick_buttons()
+    d3.select(this).call(click_button)
+    setChartType = "sankeyChart";
+    rerun(setChartType); //redraw previously selected chart 
+    update_sankey_selection()
+  });
+
+
 d3.select("#chartTypeButtons") //heatmapInnovationImpact
   .append("input")
   .attr("value", "Innovation x Impact")
   .attr("type", "button")
-  .attr("data-intro","View the frequency of targeted impacts.")
-  .attr("data-position","bottom")
   .attr("class", function (){
   //.style("background",  function() {
       if (currentChartType == "innovationImpactChart"){
@@ -2503,8 +2508,6 @@ d3.select("#chartTypeButtons")
   .append("input")
   .attr("value", "Impact x Evaluation")
   .attr("type", "button")
-  .attr("data-intro","View the frequency of evaluations used.")
-  .attr("data-position","bottom")
   .attr("class", function (){
   //.style("background",  function() {
       if (currentChartType == "impactApproachChart"){
@@ -2519,32 +2522,11 @@ d3.select("#chartTypeButtons")
     update_heatmap_selection()
   });
 
-d3.select("#chartTypeButtons") //Sankey
-  .append("input")
-  .attr("value", "Flow")
-  .attr("type", "button")
-  .attr("data-intro","View and compare projects.")
-  .attr("data-position","bottom")
-  .attr("class", function (){
-  //.style("background",  function() {
-      if (currentChartType == "sankeyChart"){
-        return "big_button clicked"
-      } else {return "big_button unclicked"}
-  })
-  .on("click", function() {
-    unclick_buttons()
-    d3.select(this).call(click_button)
-    setChartType = "sankeyChart";
-    rerun(setChartType); //redraw previously selected chart 
-    update_sankey_selection()
-  });
 
 d3.select("#chartTypeButtons")
   .append("input")
-  .attr("value", "Project details")
+  .attr("value", "Table")
   .attr("type", "button")
-  .attr("data-intro","View project details.")
-  .attr("data-position","bottom")
   .attr("class", function (){
   //.style("background",  function() {
       if (currentChartType == "project-table"){
@@ -2559,55 +2541,33 @@ d3.select("#chartTypeButtons")
     update_table_selection()
   });
 
+function runhelp() {
+  d3.select("#help").append("svg")
+    .attr("width", width + margin.heatmap.left + margin.heatmap.right)
+    .attr("height", height + margin.heatmap.top + margin.heatmap.bottom)
+    .append("g")
+    .attr("transform",
+      "translate(" + Math.max(margin.sankey.left + margin.sankey.right,margin.heatmap.left + margin.heatmap.right)*1.25 + "," + margin.heatmap.top + ")");
+  return null
+}
 
-// function close_help() {
-//   button = document.getElementById("helpbutton").className = 'invisible helpbutton'
-//   $('body').chardinJs('stop')
-// }
-
-window.onload = function() {
-  d3.select("#chartTypeButtons") //Help - info page
+d3.select("#chartTypeButtons") //Help - info page
   .append("input")
   .attr("value", "?")
-  .attr("class", "helpbutton")
   .attr("type", "button")
-  .attr("data-intro","Click to dismiss help")
-  .attr("data-position","bottom")
- .on("click", function(){
-    $('body').chardinJs('stop')
-    //window.open("http://sotl-explorer.sites.olt.ubc.ca/help/")
-    d3.select("#chartTypeButtons").selectAll(".helpbutton").remove();
-    d3.select("#chartTypeButtons") //Help - info page
-    .append("input")
-    .attr("value", "?")
-    .attr("class", "helpbutton")
-    .attr("type", "button")
-    .attr("data-intro","Click for additional help")
-    .attr("data-position","bottom")
-    .on("mouseover", function() {
-      $('body').chardinJs('start')
-      setTimeout(function() { $('.chardinjs-overlay').css('opacity', 0.7); }, 100);
-    })
-    .on("mouseout", function() {
-      $('body').chardinJs('stop')
-    })
-   .on("click", function(){
-      window.open("http://sotl-explorer.sites.olt.ubc.ca/help/")
-    });
+  .attr("class", function (){
+  //.style("background",  function() {
+      if (currentChartType == "help"){
+        return "big_button clicked"
+      } else {return "big_button unclicked"}
+  })
+  .on("click", function() {
+    unclick_buttons()
+    d3.select(this).call(click_button)
+    setChartType = "help";
+    filterData()
+    runhelp()
   });
-
-  $('body').chardinJs('start')
-  setTimeout(function() { $('.chardinjs-overlay').css('opacity', 0.7); }, 100);
-  // button = document.getElementById("helpbutton").className = 'visible helpbutton'
-};
-
-// d3.select("#chartTypeButtons").select("#helpbutton")
-//   .on("mouseover", function() {
-//     $('body').chardinJs('start')
-//   })
-//   .on("mouseout", function() {
-//     $('body').chardinJs('stop')
-//   });
 
 rerun(currentChartType); 
 
