@@ -14,7 +14,7 @@ The following individuals were involved the design and technical development of 
    **Rama Flarsheim**- ramaflarsheim@hotmail.com  
    **Kushal Goenka** - kushalgoenka@gmail.com  
 
-The following individuals were involved with conceptual development and data collection aspects of the project:
+The following individuals were involved with the conceptual development of the project, data collection and providing feedback on the design:
 
    **Ido Roll** - ido.roll@ubc.ca ([https://idoroll.com/](https://idoroll.com/))  
    **Adriana Briseno-Garzon** - adriana.briseno@ubc.ca  
