@@ -1416,7 +1416,6 @@ var heatmapImpactApproach = function(n) {
   projectdata = projectdata.getUnique()
   totalnumberprojects = projectdata.length
 
-  console.log(totalnumberprojects)
   if (totalnumberprojects == 0) {
     setwidth = 990.0/2 - Math.max(margin.sankey.left + margin.sankey.right,margin.heatmap.left + margin.heatmap.right)*1.25
     setheight = 100 - margin.heatmap.top
@@ -2572,34 +2571,38 @@ window.onload = function() {
   .attr("value", "?")
   .attr("class", "helpbutton")
   .attr("type", "button")
-  .attr("data-intro","Click to dismiss help")
+  .attr("data-intro","Click anywhere to dismiss help")
   .attr("data-position","bottom")
- .on("click", function(){
-    $('body').chardinJs('stop')
-    //window.open("http://sotl-explorer.sites.olt.ubc.ca/help/")
-    d3.select("#chartTypeButtons").selectAll(".helpbutton").remove();
-    d3.select("#chartTypeButtons") //Help - info page
-    .append("input")
-    .attr("value", "?")
-    .attr("class", "helpbutton")
-    .attr("type", "button")
-    .attr("data-intro","Click for additional help")
-    .attr("data-position","bottom")
-    .on("mouseover", function() {
-      $('body').chardinJs('start')
-      setTimeout(function() { $('.chardinjs-overlay').css('opacity', 0.7); }, 100);
-    })
-    .on("mouseout", function() {
-      $('body').chardinJs('stop')
-    })
-   .on("click", function(){
-      window.open("http://sotl-explorer.sites.olt.ubc.ca/help/")
-    });
-  });
 
   $('body').chardinJs('start')
   setTimeout(function() { $('.chardinjs-overlay').css('opacity', 0.7); }, 100);
   // button = document.getElementById("helpbutton").className = 'visible helpbutton'
+
+	$(document).click(function() {
+	    alert("me");
+	    $('body').chardinJs('stop')
+	    //window.open("http://sotl-explorer.sites.olt.ubc.ca/help/")
+	    d3.select("#chartTypeButtons").selectAll(".helpbutton").remove();
+	    d3.select("#chartTypeButtons") //Help - info page
+	    .append("input")
+	    .attr("value", "?")
+	    .attr("class", "helpbutton")
+	    .attr("type", "button")
+	    .attr("data-intro","Click for additional help")
+	    .attr("data-position","bottom")
+	    .on("mouseover", function() {
+	      $('body').chardinJs('start')
+	      setTimeout(function() { $('.chardinjs-overlay').css('opacity', 0.7); }, 100);
+	    })
+	    .on("mouseout", function() {
+	      $('body').chardinJs('stop')
+	    })
+	   .on("click", function(){
+	      window.open("http://sotl-explorer.sites.olt.ubc.ca/help/")
+	    });
+	   $(document).unbind('click');
+	});
+
 };
 
 // d3.select("#chartTypeButtons").select("#helpbutton")
