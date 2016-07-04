@@ -687,9 +687,6 @@ var margin = {
   }
 };
 
-//width = 1200 - margin.sankey.left - margin.sankey.right,
-//height = 800 - margin.sankey.top - margin.sankey.bottom;
-//width = document.getElementById("allCharts").offsetWidth
 width = (document.body.clientWidth - document.getElementById("sidebars").offsetWidth)*0.8
 //width = (document.getElementById("content").offsetWidth - document.getElementById("sidebars").offsetWidth)*0.8
 height = window.innerHeight - 140
@@ -2588,10 +2585,10 @@ window.onload = function() {
   .attr("value", "?")
   .attr("class", "helpbutton")
   .attr("type", "button")
-  .attr("data-intro","Click anywhere to dismiss help")
+  .attr("data-intro","Hover or click for help")
   .attr("data-position","bottom")
 
-  //$('body').chardinJs('start')
+  $('body').chardinJs('start')
   setTimeout(function() { $('.chardinjs-overlay').css('opacity', 0.7); }, 100);
   // button = document.getElementById("helpbutton").className = 'visible helpbutton'
 
@@ -2621,13 +2618,6 @@ window.onload = function() {
 
 };
 
-// d3.select("#chartTypeButtons").select("#helpbutton")
-//   .on("mouseover", function() {
-//     $('body').chardinJs('start')
-//   })
-//   .on("mouseout", function() {
-//     $('body').chardinJs('stop')
-//   });
 
 rerun(currentChartType); 
 
