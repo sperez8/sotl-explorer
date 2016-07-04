@@ -792,14 +792,11 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
   }
 
   if (innovation != "Innovation (all)") {
-    heatMapdata = heatMapdata.filter(function(d) {
-      return d.innovation == innovation;
-    });
-
     //find all projects with desired "innovation"
     relevant_projects = data1.map(function(d) {
       if (d["source"] == innovation){return d["project_Title"]}
     }).getUnique()
+
 
     //find all impacts that it links too
     relevant_impacts = data1.map(function(d) {
@@ -814,6 +811,19 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
         }
       }
     });
+
+    heatMapdata = heatMapdata.filter(function(d) {
+      if ($.inArray(d["project_Title"], relevant_projects) != -1){
+      	if (d.matrix == "impactXapproach") {
+	        if ($.inArray(d.impact, relevant_impacts) != -1){
+	          return true
+	        }
+	    } else if (d.innovation == innovation){
+	    	return true
+	    }
+      }
+  	});
+
   }
 
   if (impact != "Impact (all)") {
@@ -826,9 +836,9 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
   }
 
   if (evaluation != "Evaluation (all)") {
-    heatMapdata = heatMapdata.filter(function(d) {
-      return d.approach == evaluation;
-    });
+    // heatMapdata = heatMapdata.filter(function(d) {
+    //   return d.approach == evaluation;
+    // });
     
     //find all projects with desired "evaluation"
     relevant_projects = data1.map(function(d) {
@@ -848,6 +858,19 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
         }
       }
     });
+
+    heatMapdata = heatMapdata.filter(function(d) {
+      if ($.inArray(d["project_Title"], relevant_projects) != -1){
+      	if (d.matrix == "innovationXimpact") {
+	        if ($.inArray(d.impact, relevant_impacts) != -1){
+	          return true
+	        }
+	    } else if (d.approach == evaluation){
+	    	return true
+	    }
+      }
+  	});
+
   }
 
 }; //end filterData
@@ -1368,7 +1391,10 @@ var heatmapImpactApproach = function(n) {
     .map(heatMapdata, d3.map).get("impactXapproach").keys(); //impactXapproach is in the data under "matrix"
 
   evaluationApproach.sort(d3.ascending);
+  console.log(heatMapdata)
+  console.log("FILTER")
   filterData(); //get the keys before you filter the data to get the whole original lists. 
+  console.log(heatMapdata)
 
   d3.select("#impactApproachChart").append("svg")
     .attr("width", width + margin.heatmap.left + margin.heatmap.right)
@@ -1380,15 +1406,6 @@ var heatmapImpactApproach = function(n) {
   var svg = d3.select("#impactApproachChart").selectAll("g")
     .append("g")
     .attr("class", "heatmapImpactApproach" + n);
-
-
-  //title  "Area of Impact by Evaluation Approach"
-  // svg.append("text")
-  //        .attr("x", - margin.heatmap.left)             
-  //        .attr("y", 0 - (margin.heatmap.top) + 40)
-  //        .attr("text-anchor", "start")  
-  //        .attr("class","heading")
-  //        .text("Area of Impact by Evaluation Approach");  
 
 
   heatMapNest = d3.nest()
