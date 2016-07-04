@@ -2579,7 +2579,6 @@ window.onload = function() {
   // button = document.getElementById("helpbutton").className = 'visible helpbutton'
 
 	$(document).click(function() {
-	    alert("me");
 	    $('body').chardinJs('stop')
 	    //window.open("http://sotl-explorer.sites.olt.ubc.ca/help/")
 	    d3.select("#chartTypeButtons").selectAll(".helpbutton").remove();
