@@ -1308,16 +1308,16 @@ var heatmapImpactApproach = function(n) {
 
   heatMapdata = d3.tsv.parse(customData, function(d) { //type function
     return {
-      matrix: d.matrix,
-      approach: d.source,
-      impact: d.target,
+      matrix: d["matrix"],
+      approach: d["target"],
+      impact: d["source"],
       approach_longname: d["source long name"],
       impact_longname: d["target long name"],
-      value: +d.value,
-      Course_Level: d.Course_Level,
-      Faculty_School: d.Faculty_School,
+      value: +d["value"],
+      Course_Level: d["Course_Level"],
+      Faculty_School: d["Faculty_School"],
       project_Title: d["project_Title"],
-      department: d.Department,
+      department: d["Department"],
       enrolment_Cap: d["Enrolment Cap"],
       course_Format: d["Course Format"],
       project_Type: d["Type of Project"],
@@ -1334,12 +1334,12 @@ var heatmapImpactApproach = function(n) {
       return d.matrix;
     })
     .key(function(d) {
-      longnames[d.approach] = d.approach_longname
-      return d.approach;
-    }) //innovation first for innovation keys
-    .key(function(d) {
       longnames[d.impact] = d.impact_longname
       return d.impact;
+    })
+    .key(function(d) {
+      longnames[d.approach] = d.approach_longname
+      return d.approach;
     })
     .rollup(function(x) {
       return d3.sum(x, function(d) {
@@ -1355,10 +1355,10 @@ var heatmapImpactApproach = function(n) {
       return d.matrix;
     })
     .key(function(d) {
-      return d.impact;
-    }) //impact first for impact keys
-    .key(function(d) {
       return d.approach;
+    })
+    .key(function(d) {
+      return d.impact;
     })
     .rollup(function(x) {
       return d3.sum(x, function(d) {
@@ -1396,10 +1396,10 @@ var heatmapImpactApproach = function(n) {
       return d.matrix;
     })
     .key(function(d) {
-      return d.approach;
+      return d.impact;
     })
     .key(function(d) {
-      return d.impact;
+      return d.approach;
     })
     .rollup(function(projects) {
       return projects.map(function(d) {return d["project_Title"]}).getUnique()
@@ -1430,8 +1430,8 @@ var heatmapImpactApproach = function(n) {
   heatMapNest.forEach(function(d, v) {
     v.forEach(function(d2, v2) {
       dataRollUp.push({
-        impact: d,
-        approach: d2,
+        impact: d2,
+        approach: d,
         value: v2.length,
         projects: v2
       });
@@ -1445,35 +1445,35 @@ var heatmapImpactApproach = function(n) {
     return d.value;
   });
 
-  //calculating total columns      
-  for (var i = areasOfImpact.length - 1; i >= 0; i--) {
-    areasOfImpact[i]
+  //calculating total columns     
+  for (var i = evaluationApproach.length - 1; i >= 0; i--) {
+    evaluationApproach[i]
     total = []
     for (var j = dataRollUp.length - 1; j >= 0; j--) {
-      if (dataRollUp[j].impact==areasOfImpact[i]){
+      if (dataRollUp[j].impact==evaluationApproach[i]){
         total.push.apply(total,dataRollUp[j].projects)
       }
     }
     dataRollUp.push({
+      impact: evaluationApproach[i],
       approach: "Total",
-      impact: areasOfImpact[i],
       value: total.getUnique().length,
       projects: total.getUnique()
     });   
   }
 
-  //calculating total rows      
-  for (var i = evaluationApproach.length - 1; i >= 0; i--) {
-    evaluationApproach[i]
+  //calculating total columns      
+  for (var i = areasOfImpact.length - 1; i >= 0; i--) {
+    areasOfImpact[i]
     total = []
     for (var j = dataRollUp.length - 1; j >= 0; j--) {
-      if (dataRollUp[j].approach==evaluationApproach[i]){
+      if (dataRollUp[j].approach==areasOfImpact[i]){
         total.push.apply(total,dataRollUp[j].projects)
       }
     }
     dataRollUp.push({
-      approach: evaluationApproach[i],
       impact: "Total",
+      approach: areasOfImpact[i],
       value: total.getUnique().length,
       projects: total.getUnique()
     });   
@@ -1568,10 +1568,10 @@ var heatmapImpactApproach = function(n) {
   cards.enter()
     .append("rect")
     .attr("x", function(d) {
-      return evaluationApproach.indexOf(d.approach) * gridSizeX;
+      return evaluationApproach.indexOf(d.impact) * gridSizeX;
     })
     .attr("y", function(d) {
-      return ((areasOfImpact.indexOf(d.impact)) * gridSizeY) / 2;
+      return ((areasOfImpact.indexOf(d.approach)) * gridSizeY) / 2;
     })
     .attr("rx", 6)
     .attr("ry", 6)
@@ -1580,8 +1580,8 @@ var heatmapImpactApproach = function(n) {
     .attr("height", gridSizeY / 2)
     .style("cursor","pointer")
     .style("fill", function(d){
-      if (d.impact != "Total"){
-        return colorscheme(d.impact)
+      if (d.approach != "Total"){
+        return colorscheme(d.approach)
       } else {
       return grey
       }
@@ -1645,10 +1645,10 @@ var heatmapImpactApproach = function(n) {
       }
     })
     .attr("y", function(d) {
-      return ((areasOfImpact.indexOf(d.impact)+ 0.5) * gridSizeY / 2);
+      return ((areasOfImpact.indexOf(d.approach)+ 0.5) * gridSizeY / 2);
     })
     .attr("x", function(d) {
-      return (((evaluationApproach.indexOf(d.approach))+ 0.5) * gridSizeX );
+      return (((evaluationApproach.indexOf(d.impact))+ 0.5) * gridSizeX );
     })
 
 
@@ -2378,7 +2378,7 @@ var ChartType = {
 };
 
 
-var currentChartType = "innovationImpactChart" //set the default chart type to be sankey
+var currentChartType = "impactApproachChart"//"innovationImpactChart" //set the default chart type to be sankey
 
 function get_current_chart() {
   currentChart = ''
@@ -2574,7 +2574,7 @@ window.onload = function() {
   .attr("data-intro","Click anywhere to dismiss help")
   .attr("data-position","bottom")
 
-  $('body').chardinJs('start')
+  //$('body').chardinJs('start')
   setTimeout(function() { $('.chardinjs-overlay').css('opacity', 0.7); }, 100);
   // button = document.getElementById("helpbutton").className = 'visible helpbutton'
 
