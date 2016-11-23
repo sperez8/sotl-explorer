@@ -732,7 +732,7 @@ var data1 = [];
 var filterData = function(n) { //Note that the d is different for the heatMapdata and the data1 data. It comes from the parent (calling function). 
   data1 = data;
   d3.select("#sankeyChart").selectAll("svg").remove();
-  d3.select("#innovationImpactChart").selectAll("svg").remove();
+  d3.select("#practiceImpactChart").selectAll("svg").remove();
   d3.select("#impactApproachChart").selectAll("svg").remove();
   d3.select("#project-table").selectAll("tr").remove();
   d3.select("#project-table").selectAll("table").remove();
@@ -788,22 +788,22 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
     })
   }
 
-  if (innovation != "Innovation (all)") {
-    //find all projects with desired "innovation"
+  if (practice != "Practice (all)") {
+    //find all projects with desired "practice"
     relevant_projects = data1.map(function(d) {
-      if (d["source"] == innovation){return d["project_Title"]}
+      if (d["source"] == practice){return d["project_Title"]}
     }).getUnique()
 
 
     //find all impacts that it links too
     relevant_impacts = data1.map(function(d) {
-      if (d["source"] == innovation){return d["target"]}
+      if (d["source"] == practice){return d["target"]}
     }).getUnique()
 
     //filter if row matchs project and impact
     data1 = data1.filter(function(d) {
       if ($.inArray(d["project_Title"], relevant_projects) != -1){
-        if (d["source"] == innovation || ($.inArray(d["source"], relevant_impacts) != -1)){
+        if (d["source"] == practice || ($.inArray(d["source"], relevant_impacts) != -1)){
           return true
         }
       }
@@ -815,7 +815,7 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
 	        if ($.inArray(d.impact, relevant_impacts) != -1){
 	          return true
 	        }
-	    } else if (d.innovation == innovation){
+	    } else if (d.practice == practice){
 	    	return true
 	    }
       }
@@ -905,14 +905,14 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
 
 
 
-var heatmapInnovationImpact = function(n) {
+var heatmapPracticeImpact = function(n) {
   //projectList(1)
   heatMapdata = d3.tsv.parse(customData, function(d) { //type function
     return {
       matrix: d["matrix"],
-      innovation: d["source"],
+      practice: d["source"],
       impact: d["target"],
-      innovation_longname: d["source long name"],
+      practice_longname: d["source long name"],
       impact_longname: d["target long name"],
       value: +d["value"],
       Course_Level: d["Course_Level"],
@@ -935,9 +935,9 @@ var heatmapInnovationImpact = function(n) {
       return d.matrix;
     })
     .key(function(d) {
-      longnames[d.innovation] = d.innovation_longname
-      return d.innovation;
-    }) //innovation first for innovation keys
+      longnames[d.practice] = d.practice_longname
+      return d.practice;
+    }) //practice first for practice keys
     .key(function(d) {
       longnames[d.impact] = d.impact_longname
       return d.impact;
@@ -949,7 +949,7 @@ var heatmapInnovationImpact = function(n) {
     })
     .map(heatMapdata, d3.map).get("innovationXimpact");
 
-  areasOfInnovation = heatMapNest.keys().sort(d3.ascending);
+  areasOfPractice = heatMapNest.keys().sort(d3.ascending);
 
   areasOfImpact = d3.nest()
     .key(function(d) {
@@ -959,7 +959,7 @@ var heatmapInnovationImpact = function(n) {
       return d.impact;
     }) //impact first for impact keys
     .key(function(d) {
-      return d.innovation;
+      return d.practice;
     })
     .rollup(function(x) {
       return d3.sum(x, function(d) {
@@ -973,31 +973,31 @@ var heatmapInnovationImpact = function(n) {
   filterData(); //get the keys before you filter the data to get the whole original lists. 
 
   // append the svg canvas to the page
-  d3.select("#innovationImpactChart").append("svg")
+  d3.select("#practiceImpactChart").append("svg")
     .attr("width", width + margin.heatmap.left + margin.heatmap.right)
     .attr("height", height + margin.heatmap.top + margin.heatmap.bottom)
     .append("g")
     .attr("transform",
       "translate(" + Math.max(margin.sankey.left + margin.sankey.right,margin.heatmap.left + margin.heatmap.right)*1.25 + "," + margin.heatmap.top + ")")
 
-  var svg = d3.select("#innovationImpactChart").selectAll("g")
+  var svg = d3.select("#practiceImpactChart").selectAll("g")
     .append("g")
-    .attr("class", "heatmapInnovationImpact" + n);
+    .attr("class", "heatmapPracticeImpact" + n);
 
-  //title  "Innovation by Area of Impact"
+  //title  "Practice by Area of Impact"
   // svg.append("text")
   //        .attr("x", - margin.heatmap.left)             
   //        .attr("y", 0 - (margin.heatmap.top) + 40)
   //        .attr("text-anchor", "start")  
   //        .attr("class","heading")
-  //        .text("Innovation by Area of Impact"); 
+  //        .text("Practice by Area of Impact"); 
 
   heatMapNest = d3.nest()
     .key(function(d) {
       return d.matrix;
     })
     .key(function(d) {
-      return d.innovation;
+      return d.practice;
     })
     .key(function(d) {
       return d.impact;
@@ -1035,7 +1035,7 @@ var heatmapInnovationImpact = function(n) {
   heatMapNest.forEach(function(d, v) {
     v.forEach(function(d2, v2) {
       dataRollUp.push({
-        innovation: d2,
+        practice: d2,
         impact: d,
         value: v2.length,
         projects: v2
@@ -1053,12 +1053,12 @@ var heatmapInnovationImpact = function(n) {
     areasOfImpact[i]
     total = []
     for (var j = dataRollUp.length - 1; j >= 0; j--) {
-      if (dataRollUp[j].innovation==areasOfImpact[i]){
+      if (dataRollUp[j].practice==areasOfImpact[i]){
         total.push.apply(total,dataRollUp[j].projects)
       }
     }
     dataRollUp.push({
-      innovation: areasOfImpact[i],
+      practice: areasOfImpact[i],
       impact: "Total",
       value: total.getUnique().length,
       projects: total.getUnique()
@@ -1066,33 +1066,33 @@ var heatmapInnovationImpact = function(n) {
   }
 
   //calculating total rows      
-  for (var i = areasOfInnovation.length - 1; i >= 0; i--) {
-    areasOfInnovation[i]
+  for (var i = areasOfPractice.length - 1; i >= 0; i--) {
+    areasOfPractice[i]
     total = []
     for (var j = dataRollUp.length - 1; j >= 0; j--) {
-      if (dataRollUp[j].impact==areasOfInnovation[i]){
+      if (dataRollUp[j].impact==areasOfPractice[i]){
         total.push.apply(total,dataRollUp[j].projects)
       }
     }
     dataRollUp.push({
-      innovation: "Total",
-      impact: areasOfInnovation[i],
+      practice: "Total",
+      impact: areasOfPractice[i],
       value: total.getUnique().length,
       projects: total.getUnique()
     });   
   }
 
-  areasOfInnovation.push("Total")
+  areasOfPractice.push("Total")
   areasOfImpact.push("Total")
 
-  var innovationLabel = svg.selectAll("g")
-    .data(areasOfInnovation)
+  var practiceLabel = svg.selectAll("g")
+    .data(areasOfPractice)
     .enter().append("g")
     .attr("y", function(d, i) {
       return (i + 1) * (gridSizeY);
     })
     .attr("x", 0)
-    .attr("class", "innovationLabel")
+    .attr("class", "practiceLabel")
     //.style("glyph-orientation-vertical", "-90")     
     .style("text-anchor", "start")
     //.style("writing-mode", "tb")
@@ -1100,7 +1100,7 @@ var heatmapInnovationImpact = function(n) {
   ;
 
   //y-axis
-  innovationLabel
+  practiceLabel
     .append("text")
     .text(function(d) {
       return d;
@@ -1115,7 +1115,7 @@ var heatmapInnovationImpact = function(n) {
     .attr("dx", 0)
     .attr("dy", 0)
     //.attr("transform", "translate(-6," + gridSizeX/4  + ")")
-    .attr("class", "innovationLabel")
+    .attr("class", "practiceLabel")
     .style("text-anchor", "end")
     .style("vertical-align", "middle")
     .on("mouseover", function(d) {
@@ -1137,7 +1137,7 @@ var heatmapInnovationImpact = function(n) {
     .domain([1, max])
     .range([0.3,0.7,1])
 
-  svg.append("text").text("Innovation")
+  svg.append("text").text("Practice")
     .attr("class", "heading")
     .attr("x", -10)
     .attr("y", -20)
@@ -1167,7 +1167,7 @@ var heatmapInnovationImpact = function(n) {
       if (d!="Total") {
         category_tooltip(capitalizeFirstLetter(longnames[d].toLowerCase()))
       } else {
-        category_tooltip("Total per innovation")
+        category_tooltip("Total per practice")
       }
     })
     .on("mouseout", function() {remove_tooltip()})
@@ -1181,10 +1181,10 @@ var heatmapInnovationImpact = function(n) {
   cards.enter()
     .append("rect")
     .attr("y", function(d) {
-      return ((areasOfInnovation.indexOf(d.impact)) * gridSizeY / 2);
+      return ((areasOfPractice.indexOf(d.impact)) * gridSizeY / 2);
     })
     .attr("x", function(d) {
-      return areasOfImpact.indexOf(d.innovation) * gridSizeX;
+      return areasOfImpact.indexOf(d.practice) * gridSizeX;
     })
     .attr("rx", 6)
     .attr("ry", 6)
@@ -1193,13 +1193,13 @@ var heatmapInnovationImpact = function(n) {
     .attr("height", gridSizeY / 2)
     .style("cursor","pointer")
     .style("fill", function(d){
-      if (d.innovation != "Total"){
-        return colorscheme(d.innovation)
+      if (d.practice != "Total"){
+        return colorscheme(d.practice)
       } else {
       return grey
     }})
     .style("fill-opacity", function(d){
-      if (d.impact != "Total" && d.innovation != "Total"){
+      if (d.impact != "Total" && d.practice != "Total"){
         return opacityScale(d.value)
       } else {
         return opacityScale(max)
@@ -1251,15 +1251,15 @@ var heatmapInnovationImpact = function(n) {
     .append("text")
     .attr("class","cardtext")
     .text(function(d){
-      if (d.impact == "Total" || d.innovation == "Total"){
+      if (d.impact == "Total" || d.practice == "Total"){
         return d.value
       }
     })
     .attr("y", function(d) {
-      return (((areasOfInnovation.indexOf(d.impact))+ 0.5) * gridSizeY / 2);
+      return (((areasOfPractice.indexOf(d.impact))+ 0.5) * gridSizeY / 2);
     })
     .attr("x", function(d) {
-      return (areasOfImpact.indexOf(d.innovation)+ 0.5) * gridSizeX ;
+      return (areasOfImpact.indexOf(d.practice)+ 0.5) * gridSizeX ;
     })
 
 
@@ -1320,7 +1320,7 @@ var heatmapInnovationImpact = function(n) {
 
   }
   return projectdata
-}; //end heatmapInnovationImpact
+}; //end heatmapPracticeImpact
 
 
 
@@ -1331,8 +1331,8 @@ var heatmapImpactApproach = function(n) {
       matrix: d["matrix"],
       approach: d["target"],
       impact: d["source"],
-      approach_longname: d["source long name"],
-      impact_longname: d["target long name"],
+      approach_longname: d["target long name"],
+      impact_longname: d["source long name"],
       value: +d["value"],
       Course_Level: d["Course_Level"],
       Faculty_School: d["Faculty_School"],
@@ -1355,6 +1355,7 @@ var heatmapImpactApproach = function(n) {
     })
     .key(function(d) {
       longnames[d.impact] = d.impact_longname
+      console.log(d.impact, d.impact_longname)
       return d.impact;
     })
     .key(function(d) {
@@ -1388,10 +1389,7 @@ var heatmapImpactApproach = function(n) {
     .map(heatMapdata, d3.map).get("impactXapproach").keys(); //impactXapproach is in the data under "matrix"
 
   evaluationApproach.sort(d3.ascending);
-  console.log(heatMapdata)
-  console.log("FILTER")
   filterData(); //get the keys before you filter the data to get the whole original lists. 
-  console.log(heatMapdata)
 
   d3.select("#impactApproachChart").append("svg")
     .attr("width", width + margin.heatmap.left + margin.heatmap.right)
@@ -1566,6 +1564,7 @@ var heatmapImpactApproach = function(n) {
     .style("text-anchor", "start")
     .on("mouseover", function(d) {
       if (d!="Total") {
+        console.log(longnames)
         category_tooltip(capitalizeFirstLetter(longnames[d].toLowerCase()))
       } else {
         category_tooltip("Total per area of impact")
@@ -1857,7 +1856,7 @@ var sankeyChart = function(n) { //this is used to hide the previous chart. Shoul
   nodeNames = get_trait_values("name")
   nodeValues = get_numerical_trait_values("value")
 
-  svg.append("text").text("Innovation")
+  svg.append("text").text("Practice")
     .attr("class", "heading")
     .attr("x", 0)
     .attr("y", -25)
@@ -2014,7 +2013,7 @@ var tabulate = function() {
     heatMapdata = d3.tsv.parse(customData, function(d) { //type function
         return {
           matrix: d["matrix"],
-          innovation: d["source"],
+          practice: d["source"],
           impact: d["target"],
           value: +d["value"],
           project_lead: d["Name of PI or project lead(s)"],
@@ -2346,7 +2345,7 @@ var yearAwardedList = ["Year awarded (all)"].concat(get_filterOptions("Year Awar
 function get_filterCategoryOptions(category) {
   heatMapdata = d3.tsv.parse(customData);
   options = heatMapdata.map(function(d) {
-    if (category == "Innovation" && d["matrix"]=="innovationXimpact"){
+    if (category == "Practice" && d["matrix"]=="innovationXimpact"){
         return d["source"]
       } else if (category == "Impact" && d["matrix"]=="innovationXimpact"){
         return d["target"]
@@ -2365,7 +2364,7 @@ function get_filterCategoryOptions(category) {
 }
 
 
-var innovationList = ["Innovation (all)"].concat(get_filterCategoryOptions("Innovation"))
+var practiceList = ["Practice (all)"].concat(get_filterCategoryOptions("Practice"))
 var impactList = ["Impact (all)"].concat(get_filterCategoryOptions("Impact"))
 var evaluationList = ["Evaluation (all)"].concat(get_filterCategoryOptions("Evaluation"))
 
@@ -2378,25 +2377,25 @@ courseLevel = "Course level (all)";
 projectType = "Project type (all)";
 projectStage = "Project stage (all)";
 yearAwarded = "Year awarded (all)";
-innovation = "Innovation (all)"
+practice = "Practice (all)"
 impact = "Impact (all)"
 evaluation = "Evaluation (all)"
 
 //variables for filters and chart type buttons
 var ChartType = {
   "sankeyChart": sankeyChart,
-  "innovationImpactChart": heatmapInnovationImpact,
+  "practiceImpactChart": heatmapPracticeImpact,
   "impactApproachChart": heatmapImpactApproach,
   "project-table": tabulate,
   // "help": runhelp
 };
 
 
-var currentChartType = "impactApproachChart"//"innovationImpactChart" //set the default chart type to be sankey
+var currentChartType = "impactApproachChart"//"practiceImpactChart" //set the default chart type to be sankey
 
 function get_current_chart() {
   currentChart = ''
-  divs = ["sankeyChart","innovationImpactChart","impactApproachChart","project-table","help"]
+  divs = ["sankeyChart","practiceImpactChart","impactApproachChart","project-table","help"]
   for (var i = divs.length - 1; i >= 0; i--) {
     if ( $('#'+divs[i]).is(':empty') ) {
     } else { currentChart = divs[i]}
@@ -2437,8 +2436,8 @@ var yearAwardedPicker = d3.select("#context-filter-yearAwarded").append("select"
   rerun(get_current_chart())
 });
 
-var innovationPicker = d3.select("#context-filter-innovation").append("select").on("change", function() {
-  innovation = d3.select(this).property("value");
+var practicePicker = d3.select("#context-filter-practice").append("select").on("change", function() {
+  practice = d3.select(this).property("value");
   unselect_all_projects()
   rerun(get_current_chart())
 });
@@ -2462,7 +2461,7 @@ courseLevelPicker.selectAll("option").data(courseLevelList).enter().append("opti
 projectTypePicker.selectAll("option").data(projectTypeList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 projectStagePicker.selectAll("option").data(projectStageList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 yearAwardedPicker.selectAll("option").data(yearAwardedList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
-innovationPicker.selectAll("option").data(innovationList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
+practicePicker.selectAll("option").data(practiceList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 impactPicker.selectAll("option").data(impactList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 evaluationPicker.selectAll("option").data(evaluationList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 
@@ -2492,22 +2491,22 @@ function click_button(button) {
 }
 
 //chartType buttons:
-d3.select("#chartTypeButtons") //heatmapInnovationImpact
+d3.select("#chartTypeButtons") //heatmapPracticeImpact
   .append("input")
-  .attr("value", "Innovation x Impact")
+  .attr("value", "Practice x Impact")
   .attr("type", "button")
   .attr("data-intro","View the frequency of targeted impacts.")
   .attr("data-position","bottom")
   .attr("class", function (){
   //.style("background",  function() {
-      if (currentChartType == "innovationImpactChart"){
+      if (currentChartType == "practiceImpactChart"){
         return "big_button clicked"
       } else {return "big_button unclicked"}
   })
   .on("click", function() {
     unclick_buttons()
     d3.select(this).call(click_button)
-    setChartType = "innovationImpactChart";
+    setChartType = "practiceImpactChart";
     rerun(setChartType); //redraw previously selected chart 
     update_heatmap_selection()
   });
@@ -2631,7 +2630,7 @@ function reset_filters() {
   projectType = "Project type (all)";
   projectStage = "Project stage (all)";
   yearAwarded = "Year awarded (all)";
-  innovation = "Innovation (all)"
+  practice = "Practice (all)"
   impact = "Impact (all)"
   evaluation = "Evaluation (all)"
 
@@ -2640,7 +2639,7 @@ function reset_filters() {
   d3.select("#context-filter-projectType").selectAll("select").property({"value":projectType})
   d3.select("#context-filter-projectStage").selectAll("select").property({"value":projectStage})
   d3.select("#context-filter-yearAwarded").selectAll("select").property({"value":yearAwarded})
-  d3.select("#context-filter-innovation").selectAll("select").property({"value":innovation})
+  d3.select("#context-filter-practice").selectAll("select").property({"value":practice})
   d3.select("#context-filter-impact").selectAll("select").property({"value":impact})
   d3.select("#context-filter-evaluation").selectAll("select").property({"value":evaluation})
 
