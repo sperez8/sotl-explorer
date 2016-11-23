@@ -1355,7 +1355,6 @@ var heatmapImpactApproach = function(n) {
     })
     .key(function(d) {
       longnames[d.impact] = d.impact_longname
-      console.log(d.impact, d.impact_longname)
       return d.impact;
     })
     .key(function(d) {
@@ -1564,7 +1563,6 @@ var heatmapImpactApproach = function(n) {
     .style("text-anchor", "start")
     .on("mouseover", function(d) {
       if (d!="Total") {
-        console.log(longnames)
         category_tooltip(capitalizeFirstLetter(longnames[d].toLowerCase()))
       } else {
         category_tooltip("Total per area of impact")
