@@ -22,32 +22,6 @@
 
 //UBCblue = "#002145"
 
-
-var longnames = {"Active learning - short activities" : "Active Learning - short activities (one or more single-session activities, e.g., clickers)",
-            "Active learning - multi-session activities" : "Active Learning - multi-session activities (e.g., capstone projects)",
-            "Assessment" : "Assessment - peer feedback (e.g., PeerWise, Calibrated Peer Review, two-stage exams, diagnostics)",
-            "Content - student generated" : "Content - student generated (e.g., wiki, seminar)",
-            "Community based" : "Community based (e.g., community service)",
-            "Content - instructor generated" : "Content - instructor generated (e.g., videos)",
-            "Program structure" : "Program Structure (e.g., learning outcomes alignment)",
-            "Reduced seat time" : "Reduced seat time (reducing face-to-face contact hours)",
-            "Other practice": "Other practice",
-            "Course specific knowledge" : "Course specific knowledge (including program specific knowledge, e.g., the French revolution, F=ma)",
-            "Lifelong learning skills" : "Lifelong learning skills (including professional skills, e.g., collaboration, critical/interdisciplinary thinking)",
-            "Attitudes and motivation" : "Attitudes and motivation (e.g., personal goals, perceptions about discipline).",
-            "Actions and behaviours" : "Actions and behaviours (e.g.,time on task, enrolment)",
-            "Operations" : "Operations (e.g., finance, reputation)",
-            "Instructional team practices" : "Instructional team practices (e.g., TA use of time)",
-            "Other area of impact":"Other area of impact",
-            "Attitude surveys":"Attitude surveys",
-            "Interviews":"Interviews",
-            "Knowledge tests":"Knowledge tests",
-            "Observations":"Observations",
-            "Reflective writing":"Reflective writing",
-            "Secondary data":"Secondary data",
-            "Other evaluation":"Other evaluation"}
-
-
 //Change me when updating impact category names
 colorscheme = d3.scale.ordinal()
   .domain(["Course specific knowledge", "Lifelong learning skills", "Attitudes and motivation", "Actions and behaviours", "Other area of impact", "Instructional team practices", "Operations"])
@@ -714,7 +688,7 @@ var margin = {
 };
 
 width = (document.body.clientWidth - document.getElementById("sidebars").offsetWidth)*0.8
-//width = (document.getElementById("content").offsetWidth - document.getElementById("sidebars").offsetWidth)*0.8
+width = (document.getElementById("content").offsetWidth - document.getElementById("sidebars").offsetWidth)*0.8
 height = window.innerHeight - 140
 
 var formatNumber = d3.format(",.0f"), // zero decimal places
@@ -777,12 +751,12 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
   }
 
   
-  if (course_Format != "Course format (all)") {
+  if (projectType != "Project type (all)") {
     heatMapdata = heatMapdata.filter(function(d) {
-      return d.course_Format == course_Format; 
+      return d.project_Type == projectType; 
     });
     data1 = data1.filter(function(d) {
-      return d["Course Format"] == course_Format;
+      return d["Type of Project"] == projectType;
     }); //Sankey chart loads the data differently thank heat maps  :S
   }
 
@@ -837,7 +811,7 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
 
     heatMapdata = heatMapdata.filter(function(d) {
       if ($.inArray(d["project_Title"], relevant_projects) != -1){
-      	if (d.matrix == "impactXevaluation") {
+      	if (d.matrix == "impactXapproach") {
 	        if ($.inArray(d.impact, relevant_impacts) != -1){
 	          return true
 	        }
@@ -884,7 +858,7 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
 
     heatMapdata = heatMapdata.filter(function(d) {
       if ($.inArray(d["project_Title"], relevant_projects) != -1){
-      	if (d.matrix == "practiceXimpact") {
+      	if (d.matrix == "innovationXimpact") {
 	        if ($.inArray(d.impact, relevant_impacts) != -1){
 	          return true
 	        }
@@ -938,8 +912,8 @@ var heatmapPracticeImpact = function(n) {
       matrix: d["matrix"],
       practice: d["source"],
       impact: d["target"],
-      practice_longname: longnames[d["source"]],
-      impact_longname: longnames[d["target"]],
+      practice_longname: d["source long name"],
+      impact_longname: d["target long name"],
       value: +d["value"],
       Course_Level: d["Course_Level"],
       Faculty_School: d["Faculty_School"],
@@ -947,10 +921,13 @@ var heatmapPracticeImpact = function(n) {
       department: d["Department"],
       enrolment_Cap: d["Enrolment Cap"],
       course_Format: d["Course Format"],
+      project_Type: d["Type of Project"],
       project_Stage: d["Project Stage"],
       year_awarded: d["Year Awarded"]
     };
   });
+
+  longnames = {}
 
   //Great nest learning tool: http://bl.ocks.org/shancarter/raw/4748131/ 
   var heatMapNest = d3.nest()
@@ -958,9 +935,11 @@ var heatmapPracticeImpact = function(n) {
       return d.matrix;
     })
     .key(function(d) {
+      longnames[d.practice] = d.practice_longname
       return d.practice;
     }) //practice first for practice keys
     .key(function(d) {
+      longnames[d.impact] = d.impact_longname
       return d.impact;
     })
     .rollup(function(x) {
@@ -968,7 +947,7 @@ var heatmapPracticeImpact = function(n) {
         return d.value;
       })
     })
-    .map(heatMapdata, d3.map).get("practiceXimpact");
+    .map(heatMapdata, d3.map).get("innovationXimpact");
 
   areasOfPractice = heatMapNest.keys().sort(d3.ascending);
 
@@ -987,7 +966,7 @@ var heatmapPracticeImpact = function(n) {
         return d.value;
       })
     })
-    .map(heatMapdata, d3.map).get("practiceXimpact").keys();
+    .map(heatMapdata, d3.map).get("innovationXimpact").keys();
 
   areasOfImpact.sort(d3.ascending);
 
@@ -1029,7 +1008,7 @@ var heatmapPracticeImpact = function(n) {
       // })
       return projects.map(function(d) {return d["project_Title"]}).getUnique()
     })
-    .map(heatMapdata, d3.map).get("practiceXimpact");
+    .map(heatMapdata, d3.map).get("innovationXimpact");
 
 
   projectdata = []
@@ -1352,8 +1331,8 @@ var heatmapImpactApproach = function(n) {
       matrix: d["matrix"],
       approach: d["target"],
       impact: d["source"],
-      approach_longname: longnames[d["target"]],
-      impact_longname: longnames[d["source"]],
+      approach_longname: d["target long name"],
+      impact_longname: d["source long name"],
       value: +d["value"],
       Course_Level: d["Course_Level"],
       Faculty_School: d["Faculty_School"],
@@ -1361,10 +1340,13 @@ var heatmapImpactApproach = function(n) {
       department: d["Department"],
       enrolment_Cap: d["Enrolment Cap"],
       course_Format: d["Course Format"],
+      project_Type: d["Type of Project"],
       project_Stage: d["Project Stage"],
       year_awarded: d["Year Awarded"]
     };
   });
+
+  longnames = {}
 
   //Great nest learning tool: http://bl.ocks.org/shancarter/raw/4748131/ 
   var heatMapNest = d3.nest()
@@ -1372,9 +1354,11 @@ var heatmapImpactApproach = function(n) {
       return d.matrix;
     })
     .key(function(d) {
+      longnames[d.impact] = d.impact_longname
       return d.impact;
     })
     .key(function(d) {
+      longnames[d.approach] = d.approach_longname
       return d.approach;
     })
     .rollup(function(x) {
@@ -1382,7 +1366,7 @@ var heatmapImpactApproach = function(n) {
         return d.value;
       })
     })
-    .map(heatMapdata, d3.map).get("impactXevaluation"); //impactXevaluation is in the data under "matrix"
+    .map(heatMapdata, d3.map).get("impactXapproach"); //impactXapproach is in the data under "matrix"
 
   var areasOfImpact = heatMapNest.keys().sort(d3.ascending);
 
@@ -1401,7 +1385,7 @@ var heatmapImpactApproach = function(n) {
         return d.value;
       })
     })
-    .map(heatMapdata, d3.map).get("impactXevaluation").keys(); //impactXevaluation is in the data under "matrix"
+    .map(heatMapdata, d3.map).get("impactXapproach").keys(); //impactXapproach is in the data under "matrix"
 
   evaluationApproach.sort(d3.ascending);
   filterData(); //get the keys before you filter the data to get the whole original lists. 
@@ -1431,7 +1415,7 @@ var heatmapImpactApproach = function(n) {
     .rollup(function(projects) {
       return projects.map(function(d) {return d["project_Title"]}).getUnique()
     })
-    .map(heatMapdata, d3.map).get("impactXevaluation");
+    .map(heatMapdata, d3.map).get("impactXapproach");
 
   dataRollUp = [];
 
@@ -1775,7 +1759,11 @@ var sankeyChart = function(n) { //this is used to hide the previous chart. Shoul
     "links": []
   };
 
+  longnames = {}
+
   data1.forEach(function(d) {
+    longnames[d.source] = d["source long name"]
+    longnames[d.target] = d["target long name"]
     graph.nodes.push({
       "name": d.source,
     });
@@ -2033,6 +2021,7 @@ var tabulate = function() {
           department: d["Department"],
           enrolment_Cap: d["Enrolment Cap"],
           course_Format: d["Course Format"],
+          project_Type: d["Type of Project"],
           project_Stage: d["Project Stage"],
           year_awarded: d["Year Awarded"]
         };
@@ -2346,7 +2335,7 @@ function get_filterOptions(filterName) {
 //choice arrays for filters
 var courseLevelList = ["Course level (all)"].concat(get_filterOptions("Course_Level"))
 var facultyList = ["Faculty (all)"].concat(get_filterOptions("Faculty_School"))
-var courseFormatList = ["Course format (all)"].concat(get_filterOptions("Course Format"))
+var projectTypeList = ["Project type (all)"].concat(get_filterOptions("Type of Project"))
 var projectStageList = ["Project stage (all)"].concat(get_filterOptions("Project Stage"))
 var yearAwardedList = ["Year awarded (all)"].concat(get_filterOptions("Year Awarded"))
 
@@ -2354,11 +2343,11 @@ var yearAwardedList = ["Year awarded (all)"].concat(get_filterOptions("Year Awar
 function get_filterCategoryOptions(category) {
   heatMapdata = d3.tsv.parse(customData);
   options = heatMapdata.map(function(d) {
-    if (category == "Practice" && d["matrix"]=="practiceXimpact"){
+    if (category == "Practice" && d["matrix"]=="innovationXimpact"){
         return d["source"]
-      } else if (category == "Impact" && d["matrix"]=="practiceXimpact"){
+      } else if (category == "Impact" && d["matrix"]=="innovationXimpact"){
         return d["target"]
-      } else if (category == "Evaluation" && d["matrix"]=="impactXevaluation"){
+      } else if (category == "Evaluation" && d["matrix"]=="impactXapproach"){
         return d["target"]
       }
     }).getUnique()
@@ -2378,12 +2367,12 @@ var impactList = ["Impact (all)"].concat(get_filterCategoryOptions("Impact"))
 var evaluationList = ["Evaluation (all)"].concat(get_filterCategoryOptions("Evaluation"))
 
 //columns to display for table
-var tableColumns = ["project_Title", "project_lead","department","enrolment_Cap", "Course_Level", "course_Format", "year_awarded"];
+var tableColumns = ["project_Title", "project_lead","department","enrolment_Cap", "Course_Level", "course_Format", "project_Type", "year_awarded"];
 
 //set default start values
 faculty = "Faculty (all)";
 courseLevel = "Course level (all)";
-course_Format = "Course format (all)";
+projectType = "Project type (all)";
 projectStage = "Project stage (all)";
 yearAwarded = "Year awarded (all)";
 practice = "Practice (all)"
@@ -2427,8 +2416,8 @@ var courseLevelPicker = d3.select("#context-filter-courseLevel").append("select"
 });
 
 
-var courseFormatPicker = d3.select("#context-filter-CourseFormat").append("select").on("change", function() {
-  course_Format = d3.select(this).property("value");
+var projectTypePicker = d3.select("#context-filter-projectType").append("select").on("change", function() {
+  projectType = d3.select(this).property("value");
   unselect_all_projects()
   rerun(get_current_chart())
 });
@@ -2467,7 +2456,7 @@ var evaluationPicker = d3.select("#context-filter-evaluation").append("select").
 
 facultyPicker.selectAll("option").data(facultyList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 courseLevelPicker.selectAll("option").data(courseLevelList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
-courseFormatPicker.selectAll("option").data(courseFormatList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
+projectTypePicker.selectAll("option").data(projectTypeList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 projectStagePicker.selectAll("option").data(projectStageList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 yearAwardedPicker.selectAll("option").data(yearAwardedList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 practicePicker.selectAll("option").data(practiceList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
@@ -2636,7 +2625,7 @@ function reset_filters() {
   //reset to default values
   faculty = "Faculty (all)";
   courseLevel = "Course level (all)";
-  course_Format = "Course format (all)";
+  projectType = "Project type (all)";
   projectStage = "Project stage (all)";
   yearAwarded = "Year awarded (all)";
   practice = "Practice (all)"
@@ -2645,7 +2634,7 @@ function reset_filters() {
 
   d3.select("#context-filter-faculty").selectAll("select").property({"value":faculty})
   d3.select("#context-filter-courseLevel").selectAll("select").property({"value":courseLevel})
-  d3.select("#context-filter-CourseFormat").selectAll("select").property({"value":course_Format})
+  d3.select("#context-filter-projectType").selectAll("select").property({"value":projectType})
   d3.select("#context-filter-projectStage").selectAll("select").property({"value":projectStage})
   d3.select("#context-filter-yearAwarded").selectAll("select").property({"value":yearAwarded})
   d3.select("#context-filter-practice").selectAll("select").property({"value":practice})
