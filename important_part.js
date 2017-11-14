@@ -811,7 +811,7 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
 
     heatMapdata = heatMapdata.filter(function(d) {
       if ($.inArray(d["project_Title"], relevant_projects) != -1){
-      	if (d.matrix == "impactXapproach") {
+      	if (d.matrix == "impactXevaluation") {
 	        if ($.inArray(d.impact, relevant_impacts) != -1){
 	          return true
 	        }
@@ -938,7 +938,7 @@ var heatmapPracticeImpact = function(n) {
       return d.practice;
     }) //practice first for practice keys
     .key(function(d) {
-      longnames[d.impact] =  d.impact //FIX ME
+      longnames[d.impact] =  d.impact
       return d.impact;
     })
     .rollup(function(x) {
@@ -1330,8 +1330,8 @@ var heatmapImpactApproach = function(n) {
       matrix: d["matrix"],
       approach: d["target"],
       impact: d["source"],
-      approach_longname: "FIX ME",
-      impact_longname: "FIX ME",
+      approach_longname: d["target"],
+      impact_longname: d["source"], //"FIX ME",
       value: +d["value"],
       Course_Level: d["Course_Level"],
       Faculty_School: d["Faculty_School"],
@@ -1352,11 +1352,11 @@ var heatmapImpactApproach = function(n) {
       return d.matrix;
     })
     .key(function(d) {
-      longnames[d.impact] = d.impact_longname
+      longnames[d.impact] = d.impact
       return d.impact;
     })
     .key(function(d) {
-      longnames[d.approach] = d.approach_longname
+      longnames[d.approach] = d.approach //FIX ME
       return d.approach;
     })
     .rollup(function(x) {
@@ -1364,7 +1364,7 @@ var heatmapImpactApproach = function(n) {
         return d.value;
       })
     })
-    .map(heatMapdata, d3.map).get("impactXapproach"); //impactXapproach is in the data under "matrix"
+    .map(heatMapdata, d3.map).get("impactXevaluation"); //impactXevaluation is in the data under "matrix"
 
   var areasOfImpact = heatMapNest.keys().sort(d3.ascending);
 
@@ -1383,7 +1383,7 @@ var heatmapImpactApproach = function(n) {
         return d.value;
       })
     })
-    .map(heatMapdata, d3.map).get("impactXapproach").keys(); //impactXapproach is in the data under "matrix"
+    .map(heatMapdata, d3.map).get("impactXevaluation").keys(); //impactXevaluation is in the data under "matrix"
 
   evaluationApproach.sort(d3.ascending);
   filterData(); //get the keys before you filter the data to get the whole original lists. 
@@ -1413,7 +1413,7 @@ var heatmapImpactApproach = function(n) {
     .rollup(function(projects) {
       return projects.map(function(d) {return d["project_Title"]}).getUnique()
     })
-    .map(heatMapdata, d3.map).get("impactXapproach");
+    .map(heatMapdata, d3.map).get("impactXevaluation");
 
   dataRollUp = [];
 
@@ -1760,8 +1760,8 @@ var sankeyChart = function(n) { //this is used to hide the previous chart. Shoul
   longnames = {}
 
   data1.forEach(function(d) {
-    longnames[d.source] = "FIX ME"
-    longnames[d.target] = "FIX ME"
+    longnames[d.source] = d.source //FIX ME
+    longnames[d.target] = d.target //FIX ME
     graph.nodes.push({
       "name": d.source,
     });
@@ -2344,7 +2344,7 @@ function get_filterCategoryOptions(category) {
         return d["source"]
       } else if (category == "Impact" && d["matrix"]=="practiceXimpact"){
         return d["target"]
-      } else if (category == "Evaluation" && d["matrix"]=="impactXapproach"){
+      } else if (category == "Evaluation" && d["matrix"]=="impactXevaluation"){
         return d["target"]
       }
     }).getUnique()
