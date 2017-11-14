@@ -751,12 +751,12 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
   }
 
   
-  if (projectType != "Project type (all)") {
+  if (course_Format != "Course format (all)") {
     heatMapdata = heatMapdata.filter(function(d) {
-      return d.project_Type == projectType; 
+      return d.course_Format == course_Format; 
     });
     data1 = data1.filter(function(d) {
-      return d["Type of Project"] == projectType;
+      return d["Course Format"] == course_Format;
     }); //Sankey chart loads the data differently thank heat maps  :S
   }
 
@@ -858,7 +858,7 @@ var filterData = function(n) { //Note that the d is different for the heatMapdat
 
     heatMapdata = heatMapdata.filter(function(d) {
       if ($.inArray(d["project_Title"], relevant_projects) != -1){
-      	if (d.matrix == "innovationXimpact") {
+      	if (d.matrix == "practiceXimpact") {
 	        if ($.inArray(d.impact, relevant_impacts) != -1){
 	          return true
 	        }
@@ -912,8 +912,8 @@ var heatmapPracticeImpact = function(n) {
       matrix: d["matrix"],
       practice: d["source"],
       impact: d["target"],
-      practice_longname: d["source long name"],
-      impact_longname: d["target long name"],
+      practice_longname: d["source"], //FIX ME
+      impact_longname: d["target"], //FIX ME
       value: +d["value"],
       Course_Level: d["Course_Level"],
       Faculty_School: d["Faculty_School"],
@@ -921,7 +921,6 @@ var heatmapPracticeImpact = function(n) {
       department: d["Department"],
       enrolment_Cap: d["Enrolment Cap"],
       course_Format: d["Course Format"],
-      project_Type: d["Type of Project"],
       project_Stage: d["Project Stage"],
       year_awarded: d["Year Awarded"]
     };
@@ -935,11 +934,11 @@ var heatmapPracticeImpact = function(n) {
       return d.matrix;
     })
     .key(function(d) {
-      longnames[d.practice] = d.practice_longname
+      longnames[d.practice] = d.practice //FIX ME
       return d.practice;
     }) //practice first for practice keys
     .key(function(d) {
-      longnames[d.impact] = d.impact_longname
+      longnames[d.impact] =  d.impact //FIX ME
       return d.impact;
     })
     .rollup(function(x) {
@@ -947,7 +946,7 @@ var heatmapPracticeImpact = function(n) {
         return d.value;
       })
     })
-    .map(heatMapdata, d3.map).get("innovationXimpact");
+    .map(heatMapdata, d3.map).get("practiceXimpact");
 
   areasOfPractice = heatMapNest.keys().sort(d3.ascending);
 
@@ -966,7 +965,7 @@ var heatmapPracticeImpact = function(n) {
         return d.value;
       })
     })
-    .map(heatMapdata, d3.map).get("innovationXimpact").keys();
+    .map(heatMapdata, d3.map).get("practiceXimpact").keys();
 
   areasOfImpact.sort(d3.ascending);
 
@@ -1008,7 +1007,7 @@ var heatmapPracticeImpact = function(n) {
       // })
       return projects.map(function(d) {return d["project_Title"]}).getUnique()
     })
-    .map(heatMapdata, d3.map).get("innovationXimpact");
+    .map(heatMapdata, d3.map).get("practiceXimpact");
 
 
   projectdata = []
@@ -1331,8 +1330,8 @@ var heatmapImpactApproach = function(n) {
       matrix: d["matrix"],
       approach: d["target"],
       impact: d["source"],
-      approach_longname: d["target long name"],
-      impact_longname: d["source long name"],
+      approach_longname: "FIX ME",
+      impact_longname: "FIX ME",
       value: +d["value"],
       Course_Level: d["Course_Level"],
       Faculty_School: d["Faculty_School"],
@@ -1340,7 +1339,6 @@ var heatmapImpactApproach = function(n) {
       department: d["Department"],
       enrolment_Cap: d["Enrolment Cap"],
       course_Format: d["Course Format"],
-      project_Type: d["Type of Project"],
       project_Stage: d["Project Stage"],
       year_awarded: d["Year Awarded"]
     };
@@ -1762,8 +1760,8 @@ var sankeyChart = function(n) { //this is used to hide the previous chart. Shoul
   longnames = {}
 
   data1.forEach(function(d) {
-    longnames[d.source] = d["source long name"]
-    longnames[d.target] = d["target long name"]
+    longnames[d.source] = "FIX ME"
+    longnames[d.target] = "FIX ME"
     graph.nodes.push({
       "name": d.source,
     });
@@ -2021,7 +2019,6 @@ var tabulate = function() {
           department: d["Department"],
           enrolment_Cap: d["Enrolment Cap"],
           course_Format: d["Course Format"],
-          project_Type: d["Type of Project"],
           project_Stage: d["Project Stage"],
           year_awarded: d["Year Awarded"]
         };
@@ -2335,7 +2332,7 @@ function get_filterOptions(filterName) {
 //choice arrays for filters
 var courseLevelList = ["Course level (all)"].concat(get_filterOptions("Course_Level"))
 var facultyList = ["Faculty (all)"].concat(get_filterOptions("Faculty_School"))
-var projectTypeList = ["Project type (all)"].concat(get_filterOptions("Type of Project"))
+var courseFormatList = ["Course format (all)"].concat(get_filterOptions("Course Format"))
 var projectStageList = ["Project stage (all)"].concat(get_filterOptions("Project Stage"))
 var yearAwardedList = ["Year awarded (all)"].concat(get_filterOptions("Year Awarded"))
 
@@ -2343,9 +2340,9 @@ var yearAwardedList = ["Year awarded (all)"].concat(get_filterOptions("Year Awar
 function get_filterCategoryOptions(category) {
   heatMapdata = d3.tsv.parse(customData);
   options = heatMapdata.map(function(d) {
-    if (category == "Practice" && d["matrix"]=="innovationXimpact"){
+    if (category == "Practice" && d["matrix"]=="practiceXimpact"){
         return d["source"]
-      } else if (category == "Impact" && d["matrix"]=="innovationXimpact"){
+      } else if (category == "Impact" && d["matrix"]=="practiceXimpact"){
         return d["target"]
       } else if (category == "Evaluation" && d["matrix"]=="impactXapproach"){
         return d["target"]
@@ -2367,12 +2364,12 @@ var impactList = ["Impact (all)"].concat(get_filterCategoryOptions("Impact"))
 var evaluationList = ["Evaluation (all)"].concat(get_filterCategoryOptions("Evaluation"))
 
 //columns to display for table
-var tableColumns = ["project_Title", "project_lead","department","enrolment_Cap", "Course_Level", "course_Format", "project_Type", "year_awarded"];
+var tableColumns = ["project_Title", "project_lead","department","enrolment_Cap", "Course_Level", "course_Format", "year_awarded"];
 
 //set default start values
 faculty = "Faculty (all)";
 courseLevel = "Course level (all)";
-projectType = "Project type (all)";
+course_Format = "Course format (all)";
 projectStage = "Project stage (all)";
 yearAwarded = "Year awarded (all)";
 practice = "Practice (all)"
@@ -2416,8 +2413,8 @@ var courseLevelPicker = d3.select("#context-filter-courseLevel").append("select"
 });
 
 
-var projectTypePicker = d3.select("#context-filter-projectType").append("select").on("change", function() {
-  projectType = d3.select(this).property("value");
+var courseFormatPicker = d3.select("#context-filter-CourseFormat").append("select").on("change", function() {
+  course_Format = d3.select(this).property("value");
   unselect_all_projects()
   rerun(get_current_chart())
 });
@@ -2456,7 +2453,7 @@ var evaluationPicker = d3.select("#context-filter-evaluation").append("select").
 
 facultyPicker.selectAll("option").data(facultyList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 courseLevelPicker.selectAll("option").data(courseLevelList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
-projectTypePicker.selectAll("option").data(projectTypeList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
+courseFormatPicker.selectAll("option").data(courseFormatList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 projectStagePicker.selectAll("option").data(projectStageList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 yearAwardedPicker.selectAll("option").data(yearAwardedList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
 practicePicker.selectAll("option").data(practiceList).enter().append("option").attr("value", function(d) {return d}).text(function(d) {return d});
@@ -2625,7 +2622,7 @@ function reset_filters() {
   //reset to default values
   faculty = "Faculty (all)";
   courseLevel = "Course level (all)";
-  projectType = "Project type (all)";
+  course_Format = "Course format (all)";
   projectStage = "Project stage (all)";
   yearAwarded = "Year awarded (all)";
   practice = "Practice (all)"
@@ -2634,7 +2631,7 @@ function reset_filters() {
 
   d3.select("#context-filter-faculty").selectAll("select").property({"value":faculty})
   d3.select("#context-filter-courseLevel").selectAll("select").property({"value":courseLevel})
-  d3.select("#context-filter-projectType").selectAll("select").property({"value":projectType})
+  d3.select("#context-filter-CourseFormat").selectAll("select").property({"value":course_Format})
   d3.select("#context-filter-projectStage").selectAll("select").property({"value":projectStage})
   d3.select("#context-filter-yearAwarded").selectAll("select").property({"value":yearAwarded})
   d3.select("#context-filter-practice").selectAll("select").property({"value":practice})
