@@ -62,9 +62,9 @@ var opacityNormal = 0.7,
   opacityLow = 0.6,
   opacityHigh = 1,
   widthNormal = "0px",
-  widthHigh = "1px";
+  widthHigh = "2px";
 
-var highlightTime = 200; //milliseconds
+// var highlightTime = 200; //milliseconds
 
 
 // Project selection tracker
@@ -2047,8 +2047,9 @@ var tabulate = function() {
     //.map(data,d3.map).keys().sort(d3.ascending);
 
     filterData()
-    sortByKey(heatMapdata, 'year_awarded');
     tableData = heatMapdata
+    // sortByKey(tableData, 'year_awarded');
+    // filterData()
 
     columns = tableColumns
 
