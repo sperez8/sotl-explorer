@@ -59,10 +59,10 @@ darkgrey = "#565656"
 darkbluetable = '#85aec8'
 
 var opacityNormal = 0.7,
-  opacityLow = 0.2,
+  opacityLow = 0.6,
   opacityHigh = 1,
-  widthNormal = "1px",
-  widthHigh = "3px";
+  widthNormal = "0px",
+  widthHigh = "1px";
 
 var highlightTime = 200; //milliseconds
 
@@ -175,9 +175,9 @@ var update_heatmap_selection = function() {
     .each(function(l) {
       if (non_zero_intersection(selected_projects,l.projects)) {
         no_project_selected = false
-        d3.select(this).call(highlight_card, opacityHigh, darkgrey, widthHigh,1)
+        d3.select(this).call(highlight_card, opacityHigh, darkgrey, widthHigh,0.6)
       } else {
-        d3.select(this).call(highlight_card, opacityLow, "white", widthNormal,1)
+        d3.select(this).call(highlight_card, opacityLow, "white", widthNormal,0.6)
       }
     })
   if (no_project_selected){
@@ -240,10 +240,10 @@ var highlight_project_heatmap = function(card, title) {
   d3.selectAll(".card")
     .each(function(l) {
       if ($.inArray(title, l.projects) != -1) {
-        d3.select(this).call(highlight_card, opacityHigh, darkgrey, widthHigh,1)
+        d3.select(this).call(highlight_card, opacityHigh, darkgrey, widthHigh, 0.6)
         highlightProjectInList(title)
       } else {
-        d3.select(this).call(highlight_card, opacityLow, null, widthNormal, opacityLow)
+        d3.select(this).call(highlight_card, opacityLow, null, widthNormal, 0.6)
       }
     })
 }
@@ -1226,7 +1226,7 @@ var heatmapPracticeImpact = function(n) {
         return opacityScale(max)
     }})
     .style("stroke", "#ffffff")
-    .style("stroke-width", "1px")
+    .style("stroke-width", String(widthNormal)+"px")
     .style("stroke-opacity",opacityLow)
     .on("mouseover", function(l) {
       var cx = d3.event.pageX
@@ -1621,7 +1621,7 @@ var heatmapImpactApproach = function(n) {
       }
     })
     .style("stroke", "#ffffff")
-    .style("stroke-width", "1px")
+    .style("stroke-width", String(widthNormal)+"px")
     .on("mouseover", function(l) {
       var cx = d3.event.pageX
       var cy = d3.event.pageY
@@ -2015,7 +2015,12 @@ var sankeyChart = function(n) { //this is used to hide the previous chart. Shoul
 // ****************************************************************** //
 // ****************************************************************** //
 
-
+function sortByKey(array, key) {
+    return array.sort(function(a, b) {
+        var x = a[key]; var y = b[key];
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
+}
 
 var tabulate = function() {
 
@@ -2042,7 +2047,9 @@ var tabulate = function() {
     //.map(data,d3.map).keys().sort(d3.ascending);
 
     filterData()
+    sortByKey(heatMapdata, 'year_awarded');
     tableData = heatMapdata
+
     columns = tableColumns
 
     margin_table_left = 15
@@ -2400,7 +2407,7 @@ var ChartType = {
 };
 
 
-var currentChartType = "impactApproachChart"//"practiceImpactChart" //set the default chart type to be sankey
+var currentChartType = "project-table"//"practiceImpactChart" //set the default chart type to be sankey
 
 function get_current_chart() {
   currentChart = ''
@@ -2499,7 +2506,29 @@ function click_button(button) {
     .attr("class", "big_button clicked")
 }
 
+
 //chartType buttons:
+
+d3.select("#chartTypeButtons")
+  .append("input")
+  .attr("value", "Project details")
+  .attr("type", "button")
+  .attr("data-intro","View project details.")
+  .attr("data-position","bottom")
+  .attr("class", function (){
+  //.style("background",  function() {
+      if (currentChartType == "project-table"){
+        return "big_button clicked"
+      } else {return "big_button unclicked"}
+  })
+  .on("click", function() {
+    unclick_buttons()
+    d3.select(this).call(click_button)
+    setChartType = "project-table";
+    rerun(setChartType); //redraw previously selected chart
+    update_table_selection()
+  });
+
 d3.select("#chartTypeButtons") //heatmapPracticeImpact
   .append("input")
   .attr("value", "Practice x Impact")
@@ -2559,26 +2588,6 @@ d3.select("#chartTypeButtons") //Sankey
     setChartType = "sankeyChart";
     rerun(setChartType); //redraw previously selected chart 
     update_sankey_selection()
-  });
-
-d3.select("#chartTypeButtons")
-  .append("input")
-  .attr("value", "Project details")
-  .attr("type", "button")
-  .attr("data-intro","View project details.")
-  .attr("data-position","bottom")
-  .attr("class", function (){
-  //.style("background",  function() {
-      if (currentChartType == "project-table"){
-        return "big_button clicked"
-      } else {return "big_button unclicked"}
-  })
-  .on("click", function() {
-    unclick_buttons()
-    d3.select(this).call(click_button)
-    setChartType = "project-table";
-    rerun(setChartType); //redraw previously selected chart
-    update_table_selection()
   });
 
 
